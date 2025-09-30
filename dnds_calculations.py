@@ -353,9 +353,18 @@ def visibility_function(flux_bins, sigma=5., rms_fits_file="final_mosaic.pybdsf_
     # effective_image_area = np.array([np.sum(flux_bins[i] >= detection_thresholds) * pixel_area_deg2 
     #                                  for i in range(len(flux_bins))])
 
+    ## Incorrect implementation of effective area correction.  
+    # effective_image_area = np.array([
+    #     np.sum((flux_bins[i] >= detection_thresholds) & (flux_bins[i] < flux_bins[i+1])) * pixel_area_deg2 
+    #     for i in range(len(flux_bins) - 1)])
+    
+    # correct implementation
+    cumulative_area = np.array([np.sum(detection_thresholds <= edge) for edge in flux_bins])
+
     effective_image_area = np.array([
-        np.sum((flux_bins[i] >= detection_thresholds) & (flux_bins[i] < flux_bins[i+1])) * pixel_area_deg2 
-        for i in range(len(flux_bins) - 1)])
+        np.mean(cumulative_area[i:i+2]) * pixel_area_deg2
+        for i in range(len(flux_bins) - 1)
+    ])
 
     deg2_to_sr = (np.pi / 180) ** 2  # Conversion factor from deg² to sr
     effective_image_area_sr = effective_image_area * deg2_to_sr  # Convert to steradians
