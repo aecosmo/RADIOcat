@@ -10,3 +10,6 @@ for ii in range(len(input_images)):
     importfits(fitsimage=input_images[ii], imagename=input_images[ii]+'.image', overwrite=True)
     imsmooth(imagename=input_images[ii]+'.image', outfile=output_images[ii]+'.image', kernel='gauss', targetres=True, major='40arcsec', minor='22arcsec', pa="23deg", overwrite=True)
     exportfits(imagename=output_images[ii]+'.image', fitsimage=output_images[ii], overwrite=True)
+    
+import os
+os.system('rm -rf *.image')

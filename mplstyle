@@ -1,0 +1,30 @@
+# rc: runtime configuration
+text.usetex : True
+axes.titlesize : 24
+axes.labelsize : 16
+
+
+lines.linewidth : 3
+font.size : 18
+font.weight : roman
+font.family : sans-serif
+#font.sans-serif : Liberation Sans
+#font.monospace:  DejaVu Sans Mono
+xtick.labelsize : 16
+ytick.labelsize : 16
+xtick.direction: in
+ytick.direction: in
+xtick.bottom: True
+xtick.top: True
+ytick.left: True
+ytick.right: True
+xtick.major.size:    6
+ytick.major.size:    6
+xtick.minor.size:    4
+ytick.minor.size:    4
+xtick.minor.visible: True
+ytick.minor.visible: True
+
+#figure.constrained_layout.use: True
+
+

@@ -114,29 +114,6 @@ def read_pybdsf_catalog(catalog_fits):
     with fits.open(catalog_fits) as hdul:
         return np.array(hdul[1].data['Total_flux'])
 
-# def run_pybdsf(image_filename):
-#     """Run PyBDSF source finder on the image and return total flux densities."""
-#     img = bdsf.process_image(image_filename, psf_vary_do=True, adaptive_rms_box=True, 
-#                              rms_box=(150, 30), rms_box_bright=(50, 10), clobber=True, quiet=True)
-    
-#     # Extract total flux density directly from the catalog
-#     total_flux = np.array(img.srl_catalog['Total_flux'])
-
-#     return total_flux
-
-# def run_pybdsf(image_filename):
-#     """Run PyBDSF source finder on the image and return total flux densities."""
-#     img = bdsf.process_image(image_filename, psf_vary_do=False, adaptive_rms_box=True, 
-#                              rms_box=(150, 30), rms_box_bright=(50, 10), clobber=True, quiet=True)
-    
-#     # Check if sources were detected
-#     if hasattr(img, 'srl'):
-#         total_flux = np.array(img.srl['Total_flux'])
-#     else:
-#         total_flux = np.array([])  # Return an empty array if no sources are found
-
-#     return total_flux
-
 
 ####### SECTION 3: INJECT SOURCES INTO IMAGE #######
 
@@ -349,22 +326,19 @@ def visibility_function(flux_bins, sigma=5., rms_fits_file="final_mosaic.pybdsf_
     # Compute detection thresholds per pixel
     detection_thresholds = rms_flat * sigma  
 
-    # # Effective survey area for each flux bin
-    # effective_image_area = np.array([np.sum(flux_bins[i] >= detection_thresholds) * pixel_area_deg2 
-    #                                  for i in range(len(flux_bins))])
-
-    ## Incorrect implementation of effective area correction.  
+    # incorrect implementation in the last code. 
     # effective_image_area = np.array([
     #     np.sum((flux_bins[i] >= detection_thresholds) & (flux_bins[i] < flux_bins[i+1])) * pixel_area_deg2 
     #     for i in range(len(flux_bins) - 1)])
-    
-    # correct implementation
+
+    # # correct implementation
     cumulative_area = np.array([np.sum(detection_thresholds <= edge) for edge in flux_bins])
 
     effective_image_area = np.array([
         np.mean(cumulative_area[i:i+2]) * pixel_area_deg2
         for i in range(len(flux_bins) - 1)
     ])
+
 
     deg2_to_sr = (np.pi / 180) ** 2  # Conversion factor from deg² to sr
     effective_image_area_sr = effective_image_area * deg2_to_sr  # Convert to steradians
@@ -480,6 +454,5 @@ def match_recovered_sources(inj_ra, inj_dec, rec_ra, rec_dec, max_sep=30.0):
     rec_unique = rec_matched[unique_idx]
 
     return inj_unique, rec_unique
-
 
 
