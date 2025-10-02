@@ -5,8 +5,7 @@ The following packages are required:
     Astropy (at numerous places), 
     PyBDSF (for background rms estimation, source finding, and catalogue making), 
     CASA (task imsmooth is used for PSF matching for mosaic) 
-    Aegean (the AeRes tool of Aegean is used; in the step of adding sources in the residual image, \
-    for completeness correction in source counts). 
+    Aegean (the AeRes tool of Aegean is used; in the step of adding sources in the residual image, for completeness correction in source counts). 
 
 You can use these codes to make a mosaic, build a source catalogue, classify point-like and extend sources, and compute source counts with necessary corrections such as false detection rate, completeness, and visibility area. 
 
