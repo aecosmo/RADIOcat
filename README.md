@@ -1,40 +1,93 @@
-The files contain a set of codes for making a mosaic from radio images. Here, I have used uGMRT band 2 images centered on a single frequency of 147.4 MHz. The details can be found in Elahi et al. (2025), MNRAS (submitted). 
+# Radio Mosaic Analysis Codes
 
-The following packages are required: 
+![Python](https://img.shields.io/badge/python-3.8%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-    Astropy (at numerous places), 
-    PyBDSF (for background rms estimation, source finding, and catalogue making), 
-    CASA (task imsmooth is used for PSF matching for mosaic) 
-    Aegean (the AeRes tool of Aegean is used; in the step of adding sources in the residual image, for completeness correction in source counts). 
+This repository contains a set of codes for creating mosaics from radio images. The current implementation uses **uGMRT Band 2 images** centered at a single frequency of **147.4 MHz**. Detailed information about the data and methodology can be found in **Elahi et al. (2025), MNRAS (submitted)**.
 
-You can use these codes to make a mosaic, build a source catalogue, classify point-like and extend sources, and compute source counts with necessary corrections such as false detection rate, completeness, and visibility area. 
+---
 
-Data availability:
-    Necessary images can be requested from the developer (me) and the collaborators. 
-    The TGSS, GLEAM, and GLEAM-X are available in the Vizier Astronomical database. 
-    The uGMRT catalogue is present in the directory, and will soon be moved to Vizier. 
+## Table of Contents
+- [Dependencies](#dependencies)
+- [Capabilities](#capabilities)
+- [Data Availability](#data-availability)
+- [Usage Instructions](#usage-instructions)
+- [Contact](#contact)
 
-To use these codes, you can follow these instructions:
-    
-    Start with the *.SP2B.PBCOR.FITS images
-    PSF matching: casa -c imsmooth.py
-    mosaicing.ipynb
-        Reads PSF-matched images, runs pybdsf on these to generate the rms maps (which are used as weights in the next step) 
-        Makes the mosaic using PSF-matched images and their weights, runs pybdsf on the mosaic to generate the rms map of the mosaic
-        Calculates the median rms of the image. The number goes to the abstract of the paper. 
-    
-    plots.ipynb
-        Make the plots: obs strategy, multiplePCs, mosaic, triple plot, rms map, completeness, 
-    
-    Pointlike or extended. pointextended.ipynb
-    
-    crossmatch.ipynb astrometry and flux comparison. NVSS-uGMRT cross-matched spectral index. 
-    
-    catalogue.ipynb to print a sample catalogue
-    
-    crossmatch-bright-spind.ipynb finds the bright sources and extracts their information from different catalogues. 
-    
-    image_summary.inynb gives a summary of the mosaic
+---
 
+## Dependencies
 
-    
+The following packages are required:
+
+- **Astropy** – used extensively for FITS handling, WCS, and other astronomical calculations.  
+- **PyBDSF** – for background RMS estimation, source finding, and catalogue generation.  
+- **CASA** – the `imsmooth` task is used for PSF matching before mosaicing.  
+- **Aegean** – specifically the `AeRes` tool, used for adding sources to the residual image for completeness corrections in source counts.  
+
+---
+
+## Capabilities
+
+These codes allow you to:
+
+- Create mosaics from PSF-matched images.  
+- Generate source catalogues.  
+- Classify sources as point-like or extended.  
+- Compute source counts, including necessary corrections for **false detection rate, completeness, and visibility area**.  
+
+---
+
+## Data Availability
+
+- Required images can be requested from the developer or collaborators.  
+- **TGSS, GLEAM, and GLEAM-X** data are publicly available via the **[Vizier Astronomical Database](https://vizier.u-strasbg.fr/)**.  
+- The **uGMRT catalogue** is included in this repository and will soon be available on Vizier.  
+
+---
+
+## Usage Instructions
+
+1. **Start with the FITS images**: `*.SP2B.PBCOR.FITS`.  
+
+2. **PSF Matching**  
+   Run CASA with the provided script:  
+   ```bash
+   casa -c imsmooth.py
+   ```
+
+3. **Mosaicing**  
+   Open `mosaicing.ipynb` to:  
+   - Read PSF-matched images and generate RMS maps using PyBDSF (used as weights).  
+   - Create the mosaic using the PSF-matched images and their weights.  
+   - Generate the RMS map of the mosaic.  
+   - Compute the median RMS of the mosaic (used in the paper abstract).  
+
+4. **Plotting**  
+   `plots.ipynb` generates various plots, including:  
+   - Observation strategy  
+   - Multiple pointing centres (PCs)  
+   - Mosaic overview  
+   - Triple panel plots  
+   - RMS maps  
+   - Completeness curves  
+
+5. **Source Classification**  
+   `pointextended.ipynb` classifies sources as point-like or extended.  
+
+6. **Crossmatching and Astrometry**  
+   `crossmatch.ipynb` performs astrometry checks, flux comparison, and calculates NVSS–uGMRT spectral indices.  
+
+7. **Catalogue Generation**  
+   `catalogue.ipynb` prints a sample catalogue of detected sources.  
+
+8. **Bright Source Analysis**  
+   `crossmatch-bright-spind.ipynb` identifies bright sources and extracts their information from multiple catalogues.  
+
+9. **Image Summary**  
+   `image_summary.ipynb` provides a summary of the mosaic and associated images.  
+
+---
+
+## Contact
+
+For questions, requests for data, or collaboration inquiries, please contact: **Asif Elahi**.
