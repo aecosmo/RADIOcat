@@ -1,6 +1,7 @@
 The files contain a set of codes for making a mosaic from radio images. Here, I have used uGMRT band 2 images centered on a single frequency of 147.4 MHz. The details can be found in Elahi et al. (2025), MNRAS (submitted). 
 
 The following packages are required: 
+
     Astropy (at numerous places), 
     PyBDSF (for background rms estimation, source finding, and catalogue making), 
     CASA (task imsmooth is used for PSF matching for mosaic) 
