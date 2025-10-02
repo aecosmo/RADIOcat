@@ -1,11 +1,19 @@
-The files contain a set of codes for making a mosaic from radio images. Here, I have used uGMRT band 2 images centered on a single frequency of 147.4 MHz. 
-The following packages are required: Astropy, pybdsf, CASA, and aegean (for completeness correction only). 
+The files contain a set of codes for making a mosaic from radio images. Here, I have used uGMRT band 2 images centered on a single frequency of 147.4 MHz. The details can be found in Elahi et al. (2025), MNRAS (submitted). 
+
+The following packages are required: 
+    Astropy (at numerous places), 
+    PyBDSF (for background rms estimation, source finding, and catalogue making), 
+    CASA (task imsmooth is used for PSF matching for mosaic) 
+    Aegean (the AeRes tool of Aegean is used; in the step of adding sources in the residual image, for completeness correction in source counts). 
+
 You can use these codes to make a mosaic, build a source catalogue, classify point-like and extend sources, and compute source counts with necessary corrections such as false detection rate, completeness, and visibility area. 
-Necessary images can be requested from the developer (me) and the collaborators. 
-The TGSS, GLEAM, and GLEAM-X are available in the Vizier Astronomical database. The uGMRT catalogue is present in the directory, and will soon be moved to Vizier. 
 
+Data availability:
+    Necessary images can be requested from the developer (me) and the collaborators. 
+    The TGSS, GLEAM, and GLEAM-X are available in the Vizier Astronomical database. 
+    The uGMRT catalogue is present in the directory, and will soon be moved to Vizier. 
 
-To use these codes you can follow these instructions:
+To use these codes, you can follow these instructions:
     
     Start with the *.SP2B.PBCOR.FITS images
     PSF matching: casa -c imsmooth.py
