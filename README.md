@@ -1,8 +1,8 @@
 # Radio Mosaic Analysis Codes
 
-![Python](https://img.shields.io/badge/python-3.8%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.12%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-This repository contains a set of codes for creating mosaics from radio images. The current implementation uses **uGMRT Band 2 images** centered at a single frequency of **147.4 MHz**. Detailed information about the data and methodology can be found in **Elahi et al. (2025), MNRAS (submitted)**.
+This repository contains a set of code for creating mosaics from radio images, making a catalogue, and computing source counts. The current implementation uses **uGMRT Band 2 images** centered at a single frequency of **147.4 MHz**. Detailed information about the data and methodology can be found in **Elahi et al. (2025), MNRAS (submitted)**.
 
 ---
 
@@ -65,9 +65,9 @@ These codes allow you to:
 4. **Plotting**  
    `plots.ipynb` generates various plots, including:  
    - Observation strategy  
-   - Multiple pointing centres (PCs)  
-   - Mosaic overview  
-   - Triple panel plots  
+   - Images of each of the pointing centres (PCs)  
+   - Mosaic  
+   - The central part of the mosaic zoomed   
    - RMS maps  
    - Completeness curves  
 
@@ -86,11 +86,19 @@ These codes allow you to:
 9. **Image Summary**  
    `image_summary.ipynb` provides a summary of the mosaic and associated images.
 
-10. **Soure Counts**
-    `sourecounts_corrections.ipynb` makes the corrections for **false detection rate, completeness, and visibility area**
+10. **Source Counts**   
+    `sourcecounts_corrections.ipynb` makes the corrections for **false detection rate, completeness, and visibility area**
+    `sourcecounts.ipynb` will take the corrections and estimate the source counts. It will make the Table. It will also plot the corrections.
+
 
 ---
 
 ## Contact
 
-For questions, requests for data, or collaboration inquiries, please contact: **Asif Elahi**.
+For questions, requests for data, or collaboration inquiries, please contact me at **asifelahi999@gmail.com**.  
+Comments are always welcome. 
+
+
+Khandakar Md Asif Elahi  
+October 3, 2025
+
