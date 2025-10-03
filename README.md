@@ -84,7 +84,10 @@ These codes allow you to:
    `crossmatch-bright-spind.ipynb` identifies bright sources and extracts their information from multiple catalogues.  
 
 9. **Image Summary**  
-   `image_summary.ipynb` provides a summary of the mosaic and associated images.  
+   `image_summary.ipynb` provides a summary of the mosaic and associated images.
+
+10. **Soure Counts**
+    `sourecounts_corrections.ipynb` makes the corrections for **false detection rate, completeness, and visibility area**
 
 ---
 
