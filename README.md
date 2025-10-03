@@ -88,7 +88,7 @@ These codes allow you to:
 
 10. **Source Counts**   
     `sourcecounts_corrections.ipynb` makes the corrections for **false detection rate, completeness, and visibility area**
-    `sourcecounts.ipynb` will take the corrections and estimate the source counts. It will make the Table. It will also plot the corrections.
+    `sourcecounts.ipynb` uses the corrections and estimate the source counts. It makes the source counts Table. It also plots the corrections and the source counts.
 
 
 ---
