@@ -2,13 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.ndimage import convolve
+from scipy.spatial import cKDTree
 from astropy.io import fits
 from astropy.wcs import WCS
 import bdsf
 import joblib
 from joblib import Parallel, delayed
 
-####### SECTION 1: GENERATE MOCK SOURCES #######
+import pandas as pd
+from astropy.table import Table
+from astropy.coordinates import SkyCoord, match_coordinates_sky
+from astropy import units as u
+import shutil
+import os
+import warnings
+
 
 # Power-law function for fitting
 def power_law(S, A, alpha):
@@ -91,7 +99,6 @@ def plot_dn_ds(flux_densities, flux_bins):
 
 
 
-####### SECTION 4: RUN PYBDSF #######
 
 def run_pybdsf(image_filename):
     """Run PyBDSF source finder on the image."""
@@ -115,136 +122,6 @@ def read_pybdsf_catalog(catalog_fits):
         return np.array(hdul[1].data['Total_flux'])
 
 
-####### SECTION 3: INJECT SOURCES INTO IMAGE #######
-
-
-def create_psf(header, pixel_scale, is_extended):
-    """Generate a CLEAN beam PSF kernel using BMAJ, BMIN, and BPA from the FITS header."""
-    
-    # Check if required beam parameters exist in the header
-    if not all(key in header for key in ('BMAJ', 'BMIN', 'BPA')):
-        raise ValueError("FITS header missing BMAJ, BMIN, or BPA.")
-
-    # Convert beam major/minor axes from degrees to pixels
-    bmaj = header['BMAJ'] * 3600 / pixel_scale  
-    bmin = header['BMIN'] * 3600 / pixel_scale  
-    bpa = np.radians(header['BPA'])  # Convert position angle to radians
-
-    # Scale up beam size for extended sources
-    if is_extended:
-        # scale_factor = 2.0  # Modify this factor as needed
-        scale_factor = 1.2  # Modify this factor as needed
-        bmaj *= scale_factor
-        bmin *= scale_factor
-
-    # Define PSF kernel size (ensure it's odd and sufficiently large)
-    kernel_size = max(int(6 * max(bmaj, bmin)), 5)
-    kernel_size += 1 - kernel_size % 2  # Force odd size
-
-    # Generate coordinate grid centered at zero
-    y, x = np.meshgrid(
-        np.arange(kernel_size) - kernel_size // 2,
-        np.arange(kernel_size) - kernel_size // 2,
-        indexing='ij'
-    )
-
-    # Apply correct astronomical convention for rotation
-    x_rot = x * np.cos(-bpa) + y * np.sin(-bpa)
-    y_rot = -x * np.sin(-bpa) + y * np.cos(-bpa)
-
-    # Define elliptical Gaussian PSF
-    psf_kernel = np.exp(-0.5 * ((x_rot / bmaj) ** 2 + (y_rot / bmin) ** 2))
-
-    # Normalize the PSF to ensure flux conservation
-    psf_kernel /= np.sum(psf_kernel)
-    beam_area = (np.pi * bmaj * bmin) / (4 * np.log(2))
-    
-    return beam_area, psf_kernel
-
-
-def inject_single_source(x, y, flux, beam_area, psf_kernel, shape):
-    """Inject a single source convolved with the PSF."""
-    kernel_size = psf_kernel.shape[0]
-    half_size = kernel_size // 2
-
-    # Skip if out of bounds
-    if not (0 <= x < shape[1] and 0 <= y < shape[0]):
-        return np.zeros(shape)
-
-    # Define patch region
-    x_min, x_max = max(0, x - half_size), min(shape[1], x + half_size + 1)
-    y_min, y_max = max(0, y - half_size), min(shape[0], y + half_size + 1)
-
-    patch_x_min, patch_x_max = half_size - (x - x_min), half_size + (x_max - x)
-    patch_y_min, patch_y_max = half_size - (y - y_min), half_size + (y_max - y)
-
-    # Create a point source at the center
-    patch = np.zeros((kernel_size, kernel_size))
-    patch[half_size, half_size] = flux 
-
-    # Convolve with the PSF
-    convolved_patch = convolve(patch, psf_kernel) * beam_area # Convert Jy/pixel to Jy/beam
-
-    # Inject only within valid region
-    injected_patch = np.zeros(shape)
-    injected_patch[y_min:y_max, x_min:x_max] = convolved_patch[patch_y_min:patch_y_max, patch_x_min:patch_x_max]
-
-    return injected_patch
-
-
-def inject_sources(image_filename, flux_densities, is_extended_list, output_filename, n_jobs=20, batch_size=20):
-    with fits.open(image_filename, mode='readonly') as hdu:
-        header = hdu[0].header
-        wcs = WCS(header, naxis=2)
-        original_data = hdu[0].data.astype(np.float64)
-
-    if original_data.ndim == 4:
-        base_data = original_data[0, 0, :, :]
-    elif original_data.ndim == 3:
-        base_data = original_data[0, :, :]
-    elif original_data.ndim == 2:
-        base_data = original_data.copy()
-    else:
-        raise ValueError(f"Unexpected FITS data dimensions: {original_data.shape}")
-
-    pixel_scale_arcsec = np.abs(header['CDELT1']) * 3600
-
-    # Identify valid (non-NaN) pixel locations
-    valid_pixels = np.argwhere(~np.isnan(base_data))
-    valid_ra, valid_dec = wcs.all_pix2world(valid_pixels[:, 1], valid_pixels[:, 0], 0)
-
-    # Sample RA, Dec positions only from the valid region
-    num_sources = len(flux_densities)
-    selected_indices = np.random.choice(len(valid_ra), num_sources, replace=False)
-    ra_values, dec_values = valid_ra[selected_indices], valid_dec[selected_indices]
-
-    x_pix, y_pix = wcs.all_world2pix(ra_values, dec_values, 0)
-
-    new_data = base_data.copy()
-    for i in range(0, num_sources, batch_size):
-        batch_x = x_pix[i:i + batch_size]
-        batch_y = y_pix[i:i + batch_size]
-        batch_flux = flux_densities[i:i + batch_size]
-        batch_is_extended = is_extended_list[i:i + batch_size]
-
-        injected_patches = Parallel(n_jobs=n_jobs, backend="threading")(
-            delayed(inject_single_source)(
-                int(round(batch_x[j])), int(round(batch_y[j])), batch_flux[j],
-                *create_psf(header, pixel_scale_arcsec, batch_is_extended[j]),
-                base_data.shape
-            )
-            for j in range(len(batch_x))
-        )
-
-        for patch in injected_patches:
-            new_data += patch
-
-    hdu_modified = fits.PrimaryHDU(new_data, header=header)
-    hdu_modified.writeto(output_filename, overwrite=True)
-
-    return ra_values, dec_values
-
-
 
 def invert_fits_image(input_fits, output_fits):
     """Invert only the non-NaN pixels in the FITS image."""
@@ -263,25 +140,10 @@ def invert_fits_image(input_fits, output_fits):
     print(f"Inverted FITS image saved to {output_fits}")
 
 
-def compute_fdr(original_fluxes, negative_fluxes, flux_bins):
-    """Estimate the false detection rate per flux bin."""
-    # flux_bins = np.logspace(np.log10(min(original_fluxes)), np.log10(max(original_fluxes)), bins)
-    # flux_bins = np.logspace(np.log10(0.01), np.log10(20), bins)
-    # bin_centers = (flux_bins[:-1] + flux_bins[1:]) / 2
-    
-    pos_counts, _ = np.histogram(original_fluxes, bins=flux_bins)
-    neg_counts, _ = np.histogram(np.abs(negative_fluxes), bins=flux_bins)  # Use abs() for negative fluxes
-    
-    fdr = np.divide(neg_counts, pos_counts + neg_counts, out=np.zeros_like(neg_counts, dtype=float), where=(pos_counts + neg_counts) > 0)
-    # fdr = np.divide(pos_counts-neg_counts, pos_counts, out=np.zeros_like(neg_counts, dtype=float), where=(pos_counts + neg_counts) > 0)
-    # hale et al. 19, Sagar et al 2025. 
-    return pos_counts, neg_counts
-
-
 #############
-def compute_histogram(flux_densities, bins):
+def compute_histogram(flux_densities, bins, min_flux_cut):
     flux_min, flux_max = min(flux_densities), max(flux_densities) # (0.02, 21.58725416794234)
-    flux_min = 0.02 if (flux_min<0.02) else flux_min
+    flux_min = min_flux_cut if (flux_min<min_flux_cut) else flux_min
     
     flux_bins = np.logspace(np.log10(flux_min), np.log10(flux_max), bins)
     bin_centers = (flux_bins[:-1] + flux_bins[1:]) / 2
@@ -347,30 +209,6 @@ def visibility_function(flux_bins, sigma=5., rms_fits_file="final_mosaic.pybdsf_
     return total_valid_area_sr, effective_image_area_sr
 
 
-# --- Functions ---
-
-#!/usr/bin/env python
-# coding: utf-8
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from astropy.io import fits
-from astropy.wcs import WCS
-from astropy.table import Table
-from astropy.coordinates import SkyCoord, match_coordinates_sky
-from astropy import units as u
-import shutil
-import os
-import warnings
-
-# import dnsn_calculations as dnds
-
-
-# Suppress warnings
-# warnings.filterwarnings("ignore", category=UserWarning)
-
-
 def generate_synthetic_catalog(input_catalog, output_catalog, flux_densities, is_extended, valid_ra, valid_dec, seed=None):
     if seed is not None:
         np.random.seed(seed)
@@ -403,18 +241,6 @@ def generate_synthetic_catalog(input_catalog, output_catalog, flux_densities, is
     print(f"Generated {num} synthetic sources")
     return flux_densities, new_ra, new_dec
 
-
-def match_recovered_sources(inj_ra, inj_dec, rec_ra, rec_dec, max_sep=40.0):
-    inj = SkyCoord(inj_ra*u.deg, inj_dec*u.deg)
-    rec = SkyCoord(rec_ra*u.deg, rec_dec*u.deg)
-    idx, sep2d, _ = match_coordinates_sky(inj, rec)
-    mask = sep2d.arcsec < max_sep
-    return mask, idx
-
-from astropy.coordinates import SkyCoord
-import astropy.units as u
-from scipy.spatial import cKDTree
-import numpy as np
 
 def match_recovered_sources(inj_ra, inj_dec, rec_ra, rec_dec, max_sep=30.0):
     """
