@@ -87,7 +87,7 @@ These codes allow you to:
    `image_summary.ipynb` provides a summary of the mosaic and associated images.
 
 10. **Source Counts**   
-    `sourcecounts_corrections.ipynb` makes the corrections for **false detection rate, completeness, and visibility area**
+    `sourcecounts_corrections.ipynb` makes the corrections for **false detection rate, completeness, and visibility area**.
     `sourcecounts.ipynb` uses the corrections and estimate the source counts. It makes the source counts Table. It also plots the corrections and the source counts.
 
 
