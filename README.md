@@ -22,7 +22,7 @@ The following packages are required:
 - **Astropy** – used extensively for FITS handling, WCS, and other astronomical calculations.  
 - **PyBDSF** – for background RMS estimation, source finding, and catalogue generation.  
 - **CASA** – the `imsmooth` task is used for PSF matching before mosaicing.  
-- **Aegean** – specifically the `AeRes` tool, used for adding sources to the residual image for completeness corrections in source counts.  
+- **Aegean** – the `AeRes` tool is used for adding sources to the residual image for completeness corrections in source counts.  
 
 ---
 
@@ -89,6 +89,10 @@ These codes allow you to:
 10. **Source Counts**   
     `sourcecounts_corrections.ipynb` makes the corrections for **false detection rate, completeness, and visibility area**.
     `sourcecounts.ipynb` uses the corrections and estimate the source counts. It makes the source counts Table. It also plots the corrections and the source counts.
+11. **Extra**
+    `uvtracks.ipynb` 'uv'-coverage and PSF are in the notebook
+    `PSFmatching_make_catalog.ipynb` makes catalogues before and after PSF matching.
+    `PSFmatching_matchsources.ipynb` crossmatches the sources compares from before and after PSF matching catalogues and compares fluxes.
 
 
 ---
