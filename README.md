@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
-This repository contains a set of code for creating mosaics from radio images, making a catalogue, and computing source counts. The current implementation uses **uGMRT Band 2 images** centered at a single frequency of **147.4 MHz**. Detailed information about the data and methodology can be found in **[Elahi et al. (2025), MNRAS](https://doi.org/10.1093/mnras/staf1764)**. 
+This repository contains a set of code for creating mosaics from radio images, making a catalogue, and computing source counts. The current implementation uses **uGMRT Band 2 images** centered at a single frequency of **147.4 MHz**. Detailed information about the data and methodology can be found in **[Elahi et al. 2025, MNRAS](https://doi.org/10.1093/mnras/staf1764)**. 
 
 ---
 
