@@ -40,8 +40,8 @@ These codes allow you to:
 ## Data Availability
 
 - Required images can be requested from the developer or collaborators.  
-- **TGSS, GLEAM, and GLEAM-X** data are publicly available via the **[Vizier Astronomical Database](https://cdsarc.cds.unistra.fr/viz-bin/cat/J/MNRAS/544/321)**.  
-- The **uGMRT catalogue** is included in this repository and will soon be available on Vizier.  
+- **TGSS, GLEAM, and GLEAM-X** data are publicly available on the [Vizier Astronomical Database](https://cdsarc.cds.unistra.fr/).  
+- The **uGMRT catalogue** is included in this repository and is publicly available on the **[Vizier Astronomical Database](https://cdsarc.cds.unistra.fr/viz-bin/cat/J/MNRAS/544/321)**.  
 
 ---
 
